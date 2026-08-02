@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from unittest.mock import MagicMock, patch
-
 from src.config import LLMConfig
 from src.llm.client import OpencodeLLMClient
 
@@ -40,6 +37,7 @@ def test_client_available_when_binary_exists():
     opencode_path = shutil.which("opencode")
     if not opencode_path:
         import pytest
+
         pytest.skip("opencode not on PATH")
 
     config = LLMConfig(enabled=True, opencode_path=opencode_path)
@@ -73,7 +71,7 @@ def test_parse_ndjson_response_string_part():
 
 def test_parse_ndjson_response_invalid_json():
     """_parse_ndjson_response should skip invalid JSON lines."""
-    ndjson = "not json\n{\"type\": \"text\", \"part\": {\"text\": \"valid\"}}\n"
+    ndjson = 'not json\n{"type": "text", "part": {"text": "valid"}}\n'
     result = OpencodeLLMClient._parse_ndjson_response(ndjson)
     assert result == "valid"
 

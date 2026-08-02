@@ -19,9 +19,8 @@ import re
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import text
-
 import structlog
+from sqlalchemy import text
 
 logger = structlog.get_logger()
 
@@ -66,7 +65,9 @@ def normalize_merchants(engine) -> int:
     count = 0
     with engine.begin() as conn:
         rows = conn.execute(
-            text("SELECT id, description, merchant_name FROM transactions WHERE cleaned_merchant IS NULL")
+            text(
+                "SELECT id, description, merchant_name FROM transactions WHERE cleaned_merchant IS NULL"
+            )
         ).fetchall()
 
     for row in rows:
@@ -131,7 +132,7 @@ def detect_subscriptions(engine) -> int:
         groups[(desc, amt)].append((row.id, row.date or ""))
 
     count = 0
-    for (desc, amt), occurrences in groups.items():
+    for (desc, _amt), occurrences in groups.items():
         if len(occurrences) < 3:
             continue
 

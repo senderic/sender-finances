@@ -50,9 +50,7 @@ class OpencodeLLMClient:
             return False
         return shutil.which(self.config.opencode_path) is not None
 
-    def invoke(
-        self, prompt: str, system_prompt: str | None = None
-    ) -> str | None:
+    def invoke(self, prompt: str, system_prompt: str | None = None) -> str | None:
         """Send prompt to LLM, trying models in order until one succeeds.
 
         Args:
@@ -89,10 +87,13 @@ class OpencodeLLMClient:
                     [
                         self.config.opencode_path,
                         "run",
-                        "-m", model_id,
-                        "--format", "json",
+                        "-m",
+                        model_id,
+                        "--format",
+                        "json",
                         "--auto",
-                        "--dir", "/tmp",
+                        "--dir",
+                        "/tmp",
                         "--pure",
                         full_prompt,
                     ],
@@ -131,7 +132,9 @@ class OpencodeLLMClient:
             self.total_output_chars += len(text)
             self.last_fallback_hit = idx > 0
 
-            logger.info("llm_success", model=model_id, output_chars=len(text), elapsed=f"{elapsed:.1f}s")
+            logger.info(
+                "llm_success", model=model_id, output_chars=len(text), elapsed=f"{elapsed:.1f}s"
+            )
             return text
 
         logger.error("llm_all_failed", models_tried=len(all_models))

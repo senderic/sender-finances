@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import connectorx as cx
 import polars as pl
-
 import structlog
 
 logger = structlog.get_logger()
@@ -55,9 +54,12 @@ def category_breakdown(db_path: str, months: int = 3) -> pl.DataFrame:
         Polars DataFrame with columns: category, month, total, count.
     """
     import sqlite3 as _sqlite3
-    cutoff = _sqlite3.connect(db_path).execute(
-        "SELECT date('now', ?)", [f"-{months} months"]
-    ).fetchone()[0]
+
+    cutoff = (
+        _sqlite3.connect(db_path)
+        .execute("SELECT date('now', ?)", [f"-{months} months"])
+        .fetchone()[0]
+    )
 
     query = f"""
         SELECT
@@ -122,18 +124,18 @@ def detect_spending_anomalies(db_path: str, z_threshold: float = 2.0) -> pl.Data
     if df.is_empty():
         return df.with_columns(pl.lit(False, pl.Boolean).alias("flagged"))
 
-    stats = df.group_by("category").agg([
-        pl.col("amount").mean().alias("mean"),
-        pl.col("amount").std(ddof=1).alias("std"),
-    ])
+    stats = df.group_by("category").agg(
+        [
+            pl.col("amount").mean().alias("mean"),
+            pl.col("amount").std(ddof=1).alias("std"),
+        ]
+    )
 
     df = df.join(stats, on="category", how="left")
     df = df.with_columns(
         ((pl.col("amount") - pl.col("mean")) / pl.col("std").fill_null(0)).alias("z_score")
     )
-    df = df.with_columns(
-        (pl.col("z_score").abs() > z_threshold).alias("flagged")
-    )
+    df = df.with_columns((pl.col("z_score").abs() > z_threshold).alias("flagged"))
     return df.filter(pl.col("flagged")).sort("date", descending=True)
 
 
@@ -148,9 +150,12 @@ def savings_rate(db_path: str, months: int = 3) -> dict[str, float]:
         Dict with keys: 'monthly_income', 'monthly_expenses', 'savings_rate'.
     """
     import sqlite3 as _sqlite3
-    cutoff = _sqlite3.connect(db_path).execute(
-        "SELECT date('now', ?)", [f"-{months} months"]
-    ).fetchone()[0]
+
+    cutoff = (
+        _sqlite3.connect(db_path)
+        .execute("SELECT date('now', ?)", [f"-{months} months"])
+        .fetchone()[0]
+    )
 
     income_query = f"""
         SELECT AVG(monthly_total) AS avg_income
@@ -173,8 +178,16 @@ def savings_rate(db_path: str, months: int = 3) -> dict[str, float]:
     income_df = _read_sql(db_path, income_query)
     expense_df = _read_sql(db_path, expense_query)
 
-    avg_income = income_df[0, "avg_income"] if not income_df.is_empty() and income_df[0, "avg_income"] else 0.0
-    avg_expenses = abs(expense_df[0, "avg_expenses"]) if not expense_df.is_empty() and expense_df[0, "avg_expenses"] else 0.0
+    avg_income = (
+        income_df[0, "avg_income"]
+        if not income_df.is_empty() and income_df[0, "avg_income"]
+        else 0.0
+    )
+    avg_expenses = (
+        abs(expense_df[0, "avg_expenses"])
+        if not expense_df.is_empty() and expense_df[0, "avg_expenses"]
+        else 0.0
+    )
 
     rate = ((avg_income - avg_expenses) / avg_income * 100) if avg_income > 0 else 0.0
 
@@ -198,9 +211,8 @@ def wallet_brief(db_path: str) -> dict:
         Dict with keys: top_categories, subscriptions, anomalies, savings_rate.
     """
     import sqlite3 as _sqlite3
-    cutoff = _sqlite3.connect(db_path).execute(
-        "SELECT date('now', '-1 month')"
-    ).fetchone()[0]
+
+    cutoff = _sqlite3.connect(db_path).execute("SELECT date('now', '-1 month')").fetchone()[0]
 
     top = category_breakdown(db_path, months=1)
     anomalies = detect_spending_anomalies(db_path)

@@ -9,9 +9,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 import structlog
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from src.models import metadata
 
@@ -196,9 +196,7 @@ def insert_snapshot(engine: Engine, row: dict[str, Any]) -> int:
     return 1
 
 
-def update_enrichment(
-    engine: Engine, transaction_id: str, updates: dict[str, Any]
-) -> None:
+def update_enrichment(engine: Engine, transaction_id: str, updates: dict[str, Any]) -> None:
     """Update enrichment fields on a transaction.
 
     Preserves existing enrichment fields unless explicitly overwritten.
@@ -211,11 +209,7 @@ def update_enrichment(
     from src.models import transactions
 
     with engine.begin() as conn:
-        stmt = (
-            transactions.update()
-            .where(transactions.c.id == transaction_id)
-            .values(**updates)
-        )
+        stmt = transactions.update().where(transactions.c.id == transaction_id).values(**updates)
         result = conn.execute(stmt)
     if result.rowcount == 0:
         logger.warning("enrichment_no_match", transaction_id=transaction_id)

@@ -16,11 +16,11 @@ import logging
 import sys
 from getpass import getpass
 
-from simplifiapi.client import Client
 import structlog
+from simplifiapi.client import Client
 
 from src.config import Settings
-from src.token_store import load_token, save_token
+from src.token_store import save_token
 
 
 def setup_logging(level: str) -> None:
@@ -74,11 +74,12 @@ def cmd_ingest(settings: Settings) -> None:
 
 def cmd_enrich(settings: Settings) -> None:
     """Run all enrichment steps."""
+    from sqlalchemy import text
+
     from src.database import create_tables, get_engine, update_enrichment
     from src.enrichment import detect_subscriptions, normalize_merchants
     from src.llm.client import OpencodeLLMClient
     from src.llm.enrichment import recategorize_batch
-    from sqlalchemy import text
 
     engine = get_engine(settings.database.resolved_path)
     create_tables(engine)
@@ -109,13 +110,23 @@ def cmd_enrich(settings: Settings) -> None:
 
             if uncat:
                 with engine.begin() as conn:
-                    cats = conn.execute(text("SELECT name FROM categories WHERE is_income = 0")).fetchall()
+                    cats = conn.execute(
+                        text("SELECT name FROM categories WHERE is_income = 0")
+                    ).fetchall()
                 category_names = [c.name for c in cats]
 
                 print(f"Recategorizing {len(uncat)} uncategorized transactions...")
                 results = recategorize_batch(
                     client,
-                    [{"id": r.id, "description": r.description, "amount": r.amount, "merchant_name": r.merchant_name} for r in uncat],
+                    [
+                        {
+                            "id": r.id,
+                            "description": r.description,
+                            "amount": r.amount,
+                            "merchant_name": r.merchant_name,
+                        }
+                        for r in uncat
+                    ],
                     category_names,
                 )
                 for txn_id, category in results.items():
@@ -141,11 +152,21 @@ def cmd_report(settings: Settings) -> None:
 
 def cmd_dashboard(settings: Settings) -> None:
     """Launch the Streamlit dashboard."""
-    import subprocess
     import os
 
     print("Launching Streamlit dashboard...")
-    os.execvp("streamlit", ["streamlit", "run", "src/dashboard.py", "--server.port", "8501", "--server.headless", "true"])
+    os.execvp(
+        "streamlit",
+        [
+            "streamlit",
+            "run",
+            "src/dashboard.py",
+            "--server.port",
+            "8501",
+            "--server.headless",
+            "true",
+        ],
+    )
 
 
 def main() -> None:

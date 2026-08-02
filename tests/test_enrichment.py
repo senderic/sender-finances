@@ -4,8 +4,14 @@ from __future__ import annotations
 
 from sqlalchemy import create_engine, text
 
-from src.database import create_tables, update_enrichment, upsert_transactions
-from src.enrichment import _clean_merchant, _guess_subscription_label, _has_monthly_pattern, normalize_merchants, detect_subscriptions
+from src.database import create_tables, upsert_transactions
+from src.enrichment import (
+    _clean_merchant,
+    _guess_subscription_label,
+    _has_monthly_pattern,
+    detect_subscriptions,
+    normalize_merchants,
+)
 
 
 def test_clean_merchant_amazon():
@@ -80,8 +86,28 @@ def test_normalize_merchants_updates_db():
     create_tables(engine)
 
     rows = [
-        {"id": "txn-1", "account_id": "acc-1", "date": "2026-08-01", "amount": -15.99, "description": "NETFLIX.COM", "cleaned_merchant": None, "is_subscription": 0, "subscription_label": None, "llm_category": None},
-        {"id": "txn-2", "account_id": "acc-1", "date": "2026-08-01", "amount": -99.00, "description": "RANDOM XYZ", "cleaned_merchant": None, "is_subscription": 0, "subscription_label": None, "llm_category": None},
+        {
+            "id": "txn-1",
+            "account_id": "acc-1",
+            "date": "2026-08-01",
+            "amount": -15.99,
+            "description": "NETFLIX.COM",
+            "cleaned_merchant": None,
+            "is_subscription": 0,
+            "subscription_label": None,
+            "llm_category": None,
+        },
+        {
+            "id": "txn-2",
+            "account_id": "acc-1",
+            "date": "2026-08-01",
+            "amount": -99.00,
+            "description": "RANDOM XYZ",
+            "cleaned_merchant": None,
+            "is_subscription": 0,
+            "subscription_label": None,
+            "llm_category": None,
+        },
     ]
     upsert_transactions(engine, rows)
 
@@ -113,9 +139,39 @@ def test_detect_subscriptions_flags_recurring():
     create_tables(engine)
 
     rows = [
-        {"id": "txn-1", "account_id": "acc-1", "date": "2026-06-01", "amount": -14.99, "description": "NETFLIX.COM", "cleaned_merchant": None, "is_subscription": 0, "subscription_label": None, "llm_category": None},
-        {"id": "txn-2", "account_id": "acc-1", "date": "2026-07-01", "amount": -14.99, "description": "NETFLIX.COM", "cleaned_merchant": None, "is_subscription": 0, "subscription_label": None, "llm_category": None},
-        {"id": "txn-3", "account_id": "acc-1", "date": "2026-08-01", "amount": -14.99, "description": "NETFLIX.COM", "cleaned_merchant": None, "is_subscription": 0, "subscription_label": None, "llm_category": None},
+        {
+            "id": "txn-1",
+            "account_id": "acc-1",
+            "date": "2026-06-01",
+            "amount": -14.99,
+            "description": "NETFLIX.COM",
+            "cleaned_merchant": None,
+            "is_subscription": 0,
+            "subscription_label": None,
+            "llm_category": None,
+        },
+        {
+            "id": "txn-2",
+            "account_id": "acc-1",
+            "date": "2026-07-01",
+            "amount": -14.99,
+            "description": "NETFLIX.COM",
+            "cleaned_merchant": None,
+            "is_subscription": 0,
+            "subscription_label": None,
+            "llm_category": None,
+        },
+        {
+            "id": "txn-3",
+            "account_id": "acc-1",
+            "date": "2026-08-01",
+            "amount": -14.99,
+            "description": "NETFLIX.COM",
+            "cleaned_merchant": None,
+            "is_subscription": 0,
+            "subscription_label": None,
+            "llm_category": None,
+        },
     ]
     upsert_transactions(engine, rows)
 
@@ -123,7 +179,9 @@ def test_detect_subscriptions_flags_recurring():
     assert count >= 3
 
     with engine.connect() as conn:
-        subs = conn.execute(text("SELECT COUNT(*) FROM transactions WHERE is_subscription = 1")).scalar()
+        subs = conn.execute(
+            text("SELECT COUNT(*) FROM transactions WHERE is_subscription = 1")
+        ).scalar()
     assert subs == 3
 
     engine.dispose()

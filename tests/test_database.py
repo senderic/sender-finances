@@ -10,7 +10,6 @@ from sqlalchemy import create_engine, text
 
 from src.database import (
     create_tables,
-    get_engine,
     insert_snapshot,
     update_enrichment,
     upsert_accounts,
@@ -38,7 +37,14 @@ def test_create_tables(engine):
             text("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         ).fetchall()
     table_names = {r[0] for r in tables}
-    expected = {"accounts", "transactions", "categories", "tags", "snapshots", "net_worth_snapshots"}
+    expected = {
+        "accounts",
+        "transactions",
+        "categories",
+        "tags",
+        "snapshots",
+        "net_worth_snapshots",
+    }
     assert expected.issubset(table_names)
 
 
@@ -61,7 +67,9 @@ def test_upsert_accounts(engine):
     assert count == 1
 
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT name, balance FROM accounts WHERE id = 'acc-1'")).fetchone()
+        result = conn.execute(
+            text("SELECT name, balance FROM accounts WHERE id = 'acc-1'")
+        ).fetchone()
     assert result[0] == "Checking"
     assert result[1] == 5000.0
 
@@ -76,7 +84,9 @@ def test_upsert_accounts_update(engine):
     upsert_accounts(engine, rows)
 
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT name, balance FROM accounts WHERE id = 'acc-1'")).fetchone()
+        result = conn.execute(
+            text("SELECT name, balance FROM accounts WHERE id = 'acc-1'")
+        ).fetchone()
     assert result[0] == "Checking Updated"
     assert result[1] == 6000.0
 
@@ -106,7 +116,9 @@ def test_upsert_transactions(engine):
     assert count == 1
 
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT description, amount FROM transactions WHERE id = 'txn-1'")).fetchone()
+        result = conn.execute(
+            text("SELECT description, amount FROM transactions WHERE id = 'txn-1'")
+        ).fetchone()
     assert result[0] == "Coffee shop"
     assert result[1] == -4.50
 
@@ -140,7 +152,13 @@ def test_upsert_tags(engine):
 
 def test_insert_snapshot(engine):
     """insert_snapshot should store a snapshot record."""
-    row = {"fetched_at": "2026-08-01T12:00:00", "dataset_id": "ds-1", "account_count": 5, "transaction_count": 100, "raw_json": "{}"}
+    row = {
+        "fetched_at": "2026-08-01T12:00:00",
+        "dataset_id": "ds-1",
+        "account_count": 5,
+        "transaction_count": 100,
+        "raw_json": "{}",
+    }
     count = insert_snapshot(engine, row)
     assert count == 1
 

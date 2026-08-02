@@ -16,11 +16,11 @@ Usage::
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from simplifiapi.client import Client
 import structlog
+from simplifiapi.client import Client
 
 from src.database import (
     create_tables,
@@ -102,7 +102,6 @@ def ingest(settings) -> dict[str, Any]:
     Returns:
         Dict with counts and status.
     """
-    from src.config import Settings
 
     logger.info("ingest_started")
 
@@ -142,7 +141,7 @@ def ingest(settings) -> dict[str, Any]:
     cat_count = upsert_categories(engine, categories_norm)
     tag_count = upsert_tags(engine, tags_norm)
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     insert_snapshot(
         engine,
         {

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
-from src.ingest import _normalize_account, _normalize_category, _normalize_tag, _normalize_transaction
+from src.ingest import (
+    _normalize_account,
+    _normalize_category,
+    _normalize_tag,
+    _normalize_transaction,
+)
 
 
 def test_normalize_account():

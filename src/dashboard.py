@@ -37,7 +37,9 @@ def main() -> None:
     db_path = str(settings.database.resolved_path)
 
     if not Path(db_path).exists():
-        st.error(f"Database not found at `{db_path}`. Run `uv run python -m src.main ingest` first.")
+        st.error(
+            f"Database not found at `{db_path}`. Run `uv run python -m src.main ingest` first."
+        )
         return
 
     st.title("💰 Sender Finances")
@@ -57,8 +59,7 @@ def main() -> None:
     st.subheader("Top Spending Categories")
     if not breakdown.is_empty():
         cat_df = (
-            breakdown
-            .group_by("category")
+            breakdown.group_by("category")
             .agg(pl.col("total").sum().abs(), pl.col("count").sum())
             .sort("total", descending=True)
             .head(10)
@@ -93,10 +94,14 @@ def main() -> None:
         st.subheader("Spending Anomalies")
         if not anomalies.is_empty():
             display = anomalies.select(["date", "category", "amount", "z_score"])
-            display = display.with_columns(
-                pl.col("amount").abs().alias("amount"),
-                pl.col("z_score").round(2),
-            ).sort("date", descending=True).head(10)
+            display = (
+                display.with_columns(
+                    pl.col("amount").abs().alias("amount"),
+                    pl.col("z_score").round(2),
+                )
+                .sort("date", descending=True)
+                .head(10)
+            )
             st.dataframe(
                 display.to_pandas(),
                 use_container_width=True,

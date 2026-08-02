@@ -19,17 +19,103 @@ def populated_db():
     engine = create_engine(f"sqlite:///{db_path}")
     create_tables(engine)
 
-    base = {"subscription_label": None, "is_subscription": 0, "llm_category": None, "cleaned_merchant": None}
+    base = {
+        "subscription_label": None,
+        "is_subscription": 0,
+        "llm_category": None,
+        "cleaned_merchant": None,
+    }
     rows = [
-        {"id": "t1", "account_id": "a1", "date": "2026-08-01", "description": "Netflix", "amount": -14.99, "category": "Entertainment", "is_subscription": 1, "subscription_label": "Netflix", "llm_category": None, "cleaned_merchant": None},
-        {"id": "t2", "account_id": "a1", "date": "2026-08-01", "description": "Salary", "amount": 5000.00, "category": "Income", **base},
-        {"id": "t3", "account_id": "a1", "date": "2026-08-01", "description": "Groceries", "amount": -120.50, "category": "Groceries", **base},
-        {"id": "t4", "account_id": "a1", "date": "2026-07-01", "description": "Netflix", "amount": -14.99, "category": "Entertainment", "is_subscription": 1, "subscription_label": "Netflix", "llm_category": None, "cleaned_merchant": None},
-        {"id": "t5", "account_id": "a1", "date": "2026-07-01", "description": "Salary", "amount": 5000.00, "category": "Income", **base},
-        {"id": "t6", "account_id": "a1", "date": "2026-07-01", "description": "Groceries", "amount": -95.00, "category": "Groceries", **base},
-        {"id": "t7", "account_id": "a1", "date": "2026-06-01", "description": "Netflix", "amount": -14.99, "category": "Entertainment", "is_subscription": 1, "subscription_label": "Netflix", "llm_category": None, "cleaned_merchant": None},
-        {"id": "t8", "account_id": "a1", "date": "2026-06-01", "description": "Salary", "amount": 5000.00, "category": "Income", **base},
-        {"id": "t9", "account_id": "a1", "date": "2026-06-01", "description": "Groceries", "amount": -110.00, "category": "Groceries", **base},
+        {
+            "id": "t1",
+            "account_id": "a1",
+            "date": "2026-08-01",
+            "description": "Netflix",
+            "amount": -14.99,
+            "category": "Entertainment",
+            "is_subscription": 1,
+            "subscription_label": "Netflix",
+            "llm_category": None,
+            "cleaned_merchant": None,
+        },
+        {
+            "id": "t2",
+            "account_id": "a1",
+            "date": "2026-08-01",
+            "description": "Salary",
+            "amount": 5000.00,
+            "category": "Income",
+            **base,
+        },
+        {
+            "id": "t3",
+            "account_id": "a1",
+            "date": "2026-08-01",
+            "description": "Groceries",
+            "amount": -120.50,
+            "category": "Groceries",
+            **base,
+        },
+        {
+            "id": "t4",
+            "account_id": "a1",
+            "date": "2026-07-01",
+            "description": "Netflix",
+            "amount": -14.99,
+            "category": "Entertainment",
+            "is_subscription": 1,
+            "subscription_label": "Netflix",
+            "llm_category": None,
+            "cleaned_merchant": None,
+        },
+        {
+            "id": "t5",
+            "account_id": "a1",
+            "date": "2026-07-01",
+            "description": "Salary",
+            "amount": 5000.00,
+            "category": "Income",
+            **base,
+        },
+        {
+            "id": "t6",
+            "account_id": "a1",
+            "date": "2026-07-01",
+            "description": "Groceries",
+            "amount": -95.00,
+            "category": "Groceries",
+            **base,
+        },
+        {
+            "id": "t7",
+            "account_id": "a1",
+            "date": "2026-06-01",
+            "description": "Netflix",
+            "amount": -14.99,
+            "category": "Entertainment",
+            "is_subscription": 1,
+            "subscription_label": "Netflix",
+            "llm_category": None,
+            "cleaned_merchant": None,
+        },
+        {
+            "id": "t8",
+            "account_id": "a1",
+            "date": "2026-06-01",
+            "description": "Salary",
+            "amount": 5000.00,
+            "category": "Income",
+            **base,
+        },
+        {
+            "id": "t9",
+            "account_id": "a1",
+            "date": "2026-06-01",
+            "description": "Groceries",
+            "amount": -110.00,
+            "category": "Groceries",
+            **base,
+        },
     ]
     upsert_transactions(engine, rows)
 
@@ -80,6 +166,7 @@ def test_wallet_brief(populated_db):
 def test_empty_database():
     """Insights on empty database should not crash."""
     import tempfile
+
     db_path = Path(tempfile.mktemp(suffix=".db"))
     engine = create_engine(f"sqlite:///{db_path}")
     create_tables(engine)
