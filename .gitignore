@@ -10,3 +10,4 @@ data/*.db
 logs/
 .env
 *.log
+data/
