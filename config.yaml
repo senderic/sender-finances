@@ -1,0 +1,28 @@
+simplifi:
+  token_path: ${SIMPLIFI_TOKEN_PATH:-~/.simplifiapi_token}
+
+database:
+  sqlite_path: ${SQLITE_PATH:-data/sender-finances.db}
+
+enrichment:
+  subscription_detection: true
+  merchant_normalization: true
+  recategorization: true
+
+llm:
+  enabled: true
+  opencode_path: opencode
+  zen_models:
+    - opencode/deepseek-v4-flash-free
+    - opencode/mimo-v2.5-free
+    - opencode/nemotron-3-ultra-free
+    - opencode/hy3-free
+  paid_go_models:
+    - opencode-go/glm-5.2
+    - opencode-go/kimi-k3
+    - opencode-go/qwen3.7-max
+  timeout_sec: 60
+  max_calls_per_run: 10
+
+logging:
+  level: ${LOG_LEVEL:-INFO}

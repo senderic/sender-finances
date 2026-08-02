@@ -1,0 +1,80 @@
+[project]
+name = "sender-finances"
+version = "0.1.0"
+description = "Personal finance dashboard powered by Quicken Simplifi"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+    "pyyaml>=6.0,<7",
+    "sqlalchemy>=2.0,<3",
+    "structlog>=25.1,<26",
+    "connectorx>=0.4,<0.5",
+    "polars>=1.0,<2",
+    "streamlit>=1.40,<2",
+    "simplifiapi @ git+https://github.com/senderic/simplifiapi",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<9",
+    "pytest-cov>=6.0,<7",
+    "ruff>=0.15,<1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<9",
+    "pytest-cov>=6.0,<7",
+    "ruff>=0.15,<1",
+]
+
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [".venv", ".git", "__pycache__", "docs"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # simplify
+    "ARG",  # unused arguments
+    "C4",   # comprehensions
+    "T20",  # print statements
+    "PT",   # pytest style
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",     # line too long (handled by formatter)
+    "N806",     # variable name
+    "ARG001",   # unused function arg
+    "ARG002",   # unused method arg
+    "SIM114",   # combine if statements
+    "PT006",    # fixture name
+    "PT007",    # fixture param
+    "PT011",    # pytest.raises too broad
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/main.py" = ["T20"]
+"tests/*.py" = ["T20", "S101", "B017", "B011", "PT015", "SIM105"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = ["-v", "--tb=short"]
